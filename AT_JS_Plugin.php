@@ -8,8 +8,51 @@ Author: Evgeny Popov
 Author URI: http://www.ru
 */
 
-add_action('wp_enqueue_scripts', 'AT_JS_Plugin_ScriptsAction');
-function AT_JS_Plugin_ScriptsAction()
+if ($_POST['cmd'] == 'AJAXRqst')
+{
+    // Производится AJAX запрос параметров
+    $subscribers = get_users();
+    $users=array();     // Массив с логинами зарегистрированных пользователей
+    $AT_JS_users=array();
+
+    foreach ($subscribers as $subscriber)
+    {
+        $AT_JS_users[]=$subscriber -> user_login;
+    }
+
+    $AT_JS_Selector = get_option('at_js_selector');
+    $AT_JS_atchar = get_option('at_js_atchar');
+
+    // Формируем JSON строку с требуемыми данными
+    echo('{"WP_Users":' .json_encode($AT_JS_users). ',');
+    echo('"atChar":' .json_encode($AT_JS_atchar). ',');
+    echo('"Selector":' .json_encode($AT_JS_Selector). '}');
+
+    // Прекращаем выполнение скрипта (не требуется дальнейшее формирование html страницы)
+    exit;
+}
+
+
+// Если мы в адм. интерфейсе
+if ( is_admin() ) {
+    // Добавляем меню для плагина
+    add_action( 'admin_menu', 'admin_generate_menu');
+}
+
+if ($_POST['cmd'] == 'AT_JS_save_opt')
+{
+    // Была нажата кнопка сохранения настроек плагина
+    $AT_JS_Selector = $_POST['AT_JS_Plugin_Selector'];
+    $AT_JS_ATChar = $_POST['AT_JS_Plugin_atchar'];
+    // Save the posted value in the database
+    update_option('at_js_selector', $AT_JS_Selector);
+    update_option('at_js_atchar', $AT_JS_ATChar);
+}
+
+
+// Регистрируем нужные нам js скрипты и CSS стили
+add_filter('wp_enqueue_scripts', 'AT_JS_Plugin_RegisterScripts');
+function AT_JS_Plugin_RegisterScripts()
 {
     // min
     //define ('SCRIPT_DEBUG', true);
@@ -18,7 +61,6 @@ function AT_JS_Plugin_ScriptsAction()
     $min = $SCRIPT_DEBUG ? '' : '.min';
     // URL адрес для нашего плагина
     $plugin_dir = trailingslashit(plugins_url('',__FILE__));
-
 
 
     // register scripts
@@ -32,6 +74,11 @@ function AT_JS_Plugin_ScriptsAction()
         'handle'	=> 'atwho',
         'src'		=> $plugin_dir . "js/jquery.atwho{$min}.js",
         'deps'		=> array('jquery', 'caret')
+    );
+    $scripts[] = array(
+        'handle'	=> 'wp_atwho',
+        'src'		=> $plugin_dir . "js/wp_atwho.js",
+        'deps'		=> array('jquery', 'caret', 'atwho')
     );
 
     foreach( $scripts as $script )
@@ -50,61 +97,20 @@ function AT_JS_Plugin_ScriptsAction()
         wp_register_style( $k, $v, false);
     }
 
-
-    // Подключаем js скрипты
-    wp_enqueue_script('atwho');
-
     // Подключаем CSS стили
     wp_enqueue_style('atwho');
+
 }
 
-add_filter('the_content', 'AT_JS_Plugin_MainHook');
-function AT_JS_Plugin_MainHook()
+// Подключаем нужные нам скрипты  в футере (для ускорения загрузки страницы)
+add_filter('wp_footer', 'AT_JS_Plugin_EnqueueScripts');
+function AT_JS_Plugin_EnqueueScripts()
 {
-    // Селектор для выбора ID или класса элемента HTML в котором должен работать плагин
-    $selector = get_option('at_js_selector');
-    // Символ для активации выпадающего списка
-    $at = get_option('at_js_atchar');
-
-    $subscribers = get_users();
-    //$users=array();     // Массив с логинами зарегистрированных пользователей
-    $users="";
-    foreach ($subscribers as $subscriber)
-    {
-        $users .='"' .$subscriber -> user_login. '",';
-    }
-    $users = rtrim($users, ",");
-
-    print '<script language="javascript">jQuery( document ).ready(function( $ ) {
-        $("' .$selector. '").atwho({
-            at: "'.$at.'",
-            data:['.$users.']
-        });
-    });
-    </script>';
-
+    // Подключаем js скрипты
+    wp_enqueue_script('wp_atwho');
 }
 
-
-// Если мы в адм. интерфейсе
-if ( is_admin() ) {
-    // Добавляем меню для плагина
-    add_action( 'admin_menu', 'admin_generate_menu');
-
-    // Была нажата кнопка сохранения настроек плагина
-    if ($_POST['cmd'] == 'AT_JS_save_opt')
-    {
-        $AT_JS_Selector = $_POST['AT_JS_Plugin_Selector'];
-        $AT_JS_ATChar = $_POST['AT_JS_Plugin_atchar'];
-        // Save the posted value in the database
-        update_option('at_js_selector', $AT_JS_Selector);
-        update_option('at_js_atchar', $AT_JS_ATChar);
-    }
-}
-
-/*
-  Генерируем меню настроек
-*/
+// Генерируем меню настроек
 function admin_generate_menu()
 {
     // Добавляем основной раздел меню
