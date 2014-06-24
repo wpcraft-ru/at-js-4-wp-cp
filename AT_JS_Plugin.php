@@ -8,13 +8,18 @@ Author: Evgeny Popov
 Author URI: http://www.ru
 */
 
-if ($_POST['cmd'] == 'AJAXRqst')
+add_action('wp_ajax_my_action', 'myAJAXRequest');
+add_action('wp_ajax_nopriv_my_action', 'myAJAXRequest');
+function myAJAXRequest()
 {
     // Производится AJAX запрос параметров
-    $subscribers = get_users();
-    $users=array();     // Массив с логинами зарегистрированных пользователей
-    $AT_JS_users=array();
+    // проверяем nonce код, если проверка не пройдена прерываем обработку
+    if ( !wp_verify_nonce($_POST['nonce'], 'AT_JS_Plugin-nonce') )
+        die ( 'Stop!');
 
+    $subscribers = get_users(); // Массив с логинами зарегистрированных пользователей
+
+    $AT_JS_users=array();
     foreach ($subscribers as $subscriber)
     {
         $AT_JS_users[]=$subscriber -> user_login;
@@ -54,8 +59,12 @@ if ($_POST['cmd'] == 'AT_JS_save_opt')
 add_filter('wp_enqueue_scripts', 'AT_JS_Plugin_RegisterScripts');
 function AT_JS_Plugin_RegisterScripts()
 {
-    // min
-    //define ('SCRIPT_DEBUG', true);
+    wp_localize_script( 'jquery', 'myajax',
+        array(
+            'url'   => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('AT_JS_Plugin-nonce')
+        ));
+
     $SCRIPT_DEBUG = false;
 
     $min = $SCRIPT_DEBUG ? '' : '.min';
@@ -83,9 +92,10 @@ function AT_JS_Plugin_RegisterScripts()
 
     foreach( $scripts as $script )
     {
-        wp_register_script( $script['handle'], $script['src'], $script['deps']);
+        wp_register_script( $script['handle'], $script['src'], $script['deps'], false ,true);
     }
-
+    // Подключаем js скрипты
+    wp_enqueue_script('atwho');
 
     // register styles
     $styles = array(
@@ -99,15 +109,32 @@ function AT_JS_Plugin_RegisterScripts()
 
     // Подключаем CSS стили
     wp_enqueue_style('atwho');
-
 }
 
 // Подключаем нужные нам скрипты  в футере (для ускорения загрузки страницы)
-add_filter('wp_footer', 'AT_JS_Plugin_EnqueueScripts');
+add_filter('wp_footer', 'AT_JS_Plugin_EnqueueScripts', 100);
 function AT_JS_Plugin_EnqueueScripts()
 {
-    // Подключаем js скрипты
-    wp_enqueue_script('wp_atwho');
+?>
+    <script type="text/javascript">
+        jQuery( document ).ready(function( $ ) {
+            $.ajax({
+                url         : myajax.url,
+                type        : "POST",
+                dataType    : 'json',
+                data        : "action=my_action&nonce="+myajax.nonce,
+                success     : function(data){
+                    $(data.Selector).atwho({
+                        at: data.atChar,
+                        data: data.WP_Users
+                    });
+                }
+            });
+
+        });
+    </script>
+<?php
+
 }
 
 // Генерируем меню настроек
