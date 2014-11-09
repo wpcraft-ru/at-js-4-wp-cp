@@ -19,17 +19,12 @@ function add_at_js_users_to_meta( $comment_ID, $comment_approved ){
 	//Проверем наличия символа @ в начале слова, если есть, то добавляем ид этого пользователя в массив
 	foreach ($content_words as $value) {
 		$rest = substr($value, 0, 1);
-		if ($rest === @) {
-			get_user_by('login', substr($rest, 1));
-			$user_id = $user->ID;
-			
+		if ($rest === '@') {			
 			//Добавляем массив с ИД'шниками для уведомления по почте в мету коммента
-			add_metadata('comment', $comment_ID, 'notifications_ids', $user_id, false);
+			if($user = get_user_by('login', substr($rest, 1))) add_metadata('comment', $comment_ID, 'notifications_ids', $user->ID, false);
 		}
 	}
 	
 }
 
 add_action( 'comment_post', 'add_at_js_users_to_meta', 10, 2 );
-
-?>
