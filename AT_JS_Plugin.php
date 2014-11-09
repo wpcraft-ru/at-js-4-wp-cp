@@ -8,6 +8,12 @@ Author: Evgeny Popov
 Author URI: http://www.ru
 */
 
+/*
+Подключаем компоненты
+*/
+//Сохранение выбранного пользователя в мету коммента
+require_once('includes/user_to_meta.php');
+
 add_action('wp_ajax_my_action', 'myAJAXRequest');
 add_action('wp_ajax_nopriv_my_action', 'myAJAXRequest');
 function myAJAXRequest()
