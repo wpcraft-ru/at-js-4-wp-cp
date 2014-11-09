@@ -1,11 +1,12 @@
 <?php
 /*
 Plugin Name: AT_JS_Plugin
-Plugin URI: http://URI_Of_Page_Describing_Plugin_and_Updates
-Description: At.js_Plugin
-Version: 0.1
-Author: Evgeny Popov
-Author URI: http://www.ru
+Description: At.js for WordPress
+Version: 20141008.2
+Author: CasePress
+GitHub Plugin URI: https://github.com/casepress-studio/at-js-4-wp-cp
+GitHub Branch: master
+Author URI: http://casepress.org
 */
 
 /*
@@ -14,9 +15,9 @@ Author URI: http://www.ru
 //Сохранение выбранного пользователя в мету коммента
 require_once('includes/user_to_meta.php');
 
-add_action('wp_ajax_my_action', 'myAJAXRequest');
-add_action('wp_ajax_nopriv_my_action', 'myAJAXRequest');
-function myAJAXRequest()
+add_action('wp_ajax_at_js_user_select', 'at_js_user_select_cp');
+add_action('wp_ajax_nopriv_at_js_user_select', 'at_js_user_select_cp');
+function at_js_user_select_cp()
 {
     // Производится AJAX запрос параметров
     // проверяем nonce код, если проверка не пройдена прерываем обработку
@@ -128,7 +129,7 @@ function AT_JS_Plugin_EnqueueScripts()
                 url         : myajax.url,
                 type        : "POST",
                 dataType    : 'json',
-                data        : "action=my_action&nonce="+myajax.nonce,
+                data        : "action=at_js_user_select&nonce="+myajax.nonce,
                 success     : function(data){
                     $(data.Selector).atwho({
                         at: data.atChar,
