@@ -21,7 +21,7 @@ function add_at_js_users_to_meta( $comment_ID, $comment_approved ){
 		$rest = substr($value, 0, 1);
 		if ($rest === '@') {			
 			//Добавляем массив с ИД'шниками для уведомления по почте в мету коммента
-			if($user = get_user_by('login', substr($rest, 1))) add_metadata('comment', $comment_ID, 'notifications_ids', $user->ID, false);
+			if($user = get_user_by('login', substr($rest, 1))) add_metadata('comment', $comment_ID, 'users_mention_cp', $user->ID, false);
 		}
 	}
 	
