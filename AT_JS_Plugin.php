@@ -2,7 +2,7 @@
 /*
 Plugin Name: AT_JS_Plugin_WP
 Description: At.js for WordPress
-Version: 20141008.3
+Version: 20141010
 GitHub Plugin URI: https://github.com/casepress-studio/at-js-4-wp-cp
 GitHub Branch: master
 Author URI: http://casepress.org
