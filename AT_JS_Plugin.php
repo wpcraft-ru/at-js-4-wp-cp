@@ -2,7 +2,7 @@
 /*
 Plugin Name: AT_JS_Plugin_WP
 Description: At.js for WordPress
-Version: 20141010
+Version: 20141112
 GitHub Plugin URI: https://github.com/casepress-studio/at-js-4-wp-cp
 GitHub Branch: master
 Author URI: http://casepress.org
@@ -26,18 +26,20 @@ function at_js_user_select_cp()
     $subscribers = get_users(); // Массив с логинами зарегистрированных пользователей
 
     $AT_JS_users=array();
+	$AT_JS_users_names=array();
+	
     foreach ($subscribers as $subscriber)
     {
         $AT_JS_users[]=$subscriber -> user_login;
+		$AT_JS_users_names[]=$subscriber -> display_name;
     }
-
+	
     $AT_JS_Selector = '#comment';
-    $AT_JS_atchar = '@';
 
     // Формируем JSON строку с требуемыми данными
-    echo('{"WP_Users":' .json_encode($AT_JS_users). ',');
-    echo('"atChar":' .json_encode($AT_JS_atchar). ',');
-    echo('"Selector":' .json_encode($AT_JS_Selector). '}');
+	echo('{"WP_Users":' .json_encode($AT_JS_users). ',');
+	echo('"WP_Users_Names":' .json_encode($AT_JS_users_names). ',');
+    echo('"Selector":' .json_encode($AT_JS_Selector). '}'); 
 
     // Прекращаем выполнение скрипта (не требуется дальнейшее формирование html страницы)
     exit;
@@ -75,11 +77,6 @@ function AT_JS_Plugin_RegisterScripts()
         'src'		=> $plugin_dir . "js/jquery.atwho{$min}.js",
         'deps'		=> array('jquery', 'caret')
     );
-    $scripts[] = array(
-        'handle'	=> 'wp_atwho',
-        'src'		=> $plugin_dir . "js/wp_atwho.js",
-        'deps'		=> array('jquery', 'caret', 'atwho')
-    );
 
     foreach( $scripts as $script )
     {
@@ -109,15 +106,25 @@ function AT_JS_Plugin_EnqueueScripts()
 ?>
     <script type="text/javascript">
         jQuery( document ).ready(function( $ ) {
+	
             $.ajax({
                 url         : myajax.url,
                 type        : "POST",
                 dataType    : 'json',
                 data        : "action=at_js_user_select&nonce="+myajax.nonce,
                 success     : function(data){
+					var real_names = data.WP_Users_Names;
+					
+					var names = data.WP_Users;
+					var names = $.map(names,function(value,i) {
+					  return {'id':i,'name':value,'real_name':real_names[i]};
+					});
+
                     $(data.Selector).atwho({
-                        at: data.atChar,
-                        data: data.WP_Users
+                        at: '@',
+						tpl: "<li data-value='${name}'>${real_name} <small>${name}</small></li>",
+						search_key: 'real_name',
+						data: names
                     });
                 }
             });
