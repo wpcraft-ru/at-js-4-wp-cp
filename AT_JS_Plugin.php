@@ -122,7 +122,7 @@ function AT_JS_Plugin_EnqueueScripts()
 
                     $(data.Selector).atwho({
                         at: '@',
-						tpl: "<li data-value='${name}'>${real_name} <small>${name}</small></li>",
+						tpl: "<li data-value='@${name}'>${real_name} <small>${name}</small></li>",
 						search_key: 'real_name',
 						data: names
                     });

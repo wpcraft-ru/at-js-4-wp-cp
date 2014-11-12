@@ -6,9 +6,6 @@ function add_at_js_users_to_meta( $comment_ID, $comment_approved ){
 		return;
 		
 	$comment = get_comment( $comment_ID );
-	$post = get_post( $comment->comment_post_ID );
-	$user = get_userdata( $post->post_author );
-	
 
 	$content_for_serach = $comment->comment_content;
 	//Массив для ID пользователей, которых нужно уведомить
