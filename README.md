@@ -9,6 +9,7 @@ At.js для WordPress by CasePress
 # Features
 - Уведомляет пользователя, если начать ввод с @
 - ИД всех пользователей, которые уведомлены в комментарии записывает в мету users_mention_cp (для того чтобы потом можно было отправить им уведомления)
+- Поддержка  GitHub Updater https://github.com/afragen/github-updater/
 
 # Changelog
 
