@@ -1,7 +1,14 @@
 at-js-4-wp-cp
 =============
 
-At.js for WordPress by CasePress
+At.js для WordPress by CasePress
+
+Позволяет упоминать пользователей сайта через @ как в социальных сетях и на GitHub
+Основан на jQuery плагине At.js https://github.com/ichord/At.js
+
+# Features
+- Уведомляет пользователя, если начать ввод с @
+- ИД всех пользователей, которые уведомлены в комментарии записывает в мету users_mention_cp (для того чтобы потом можно было отправить им уведомления)
 
 # Changelog
 
