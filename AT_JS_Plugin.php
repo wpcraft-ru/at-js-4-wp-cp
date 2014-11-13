@@ -117,7 +117,7 @@ function AT_JS_Plugin_EnqueueScripts()
 					
 					var names = data.WP_Users;
 					var names = $.map(names,function(value,i) {
-					  return {'id':i,'name':value, 'name_name':real_names[i]+' <small>'+value+'</small>'};
+					  return {'id':i,'name':value, 'name_name':real_names[i]+' - '+value};
 					});
 
                     $(data.Selector).atwho({
