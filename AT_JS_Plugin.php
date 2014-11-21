@@ -2,8 +2,8 @@
 /*
 Plugin Name: At.js in WP by Sistemo
 Description: At.js for WordPress comments
-Version: 20141121
-GitHub Plugin URI: https://github.com/casepress-studio/at-js-4-wp-cp
+Version: 20141121.2
+GitHub Plugin URI: https://github.com/sistemo/at-js-4-wp-cp
 GitHub Branch: master
 Author URI: http://casepress.org
 */
